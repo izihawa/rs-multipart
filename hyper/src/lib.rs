@@ -16,7 +16,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! hyper-multipart-rfc7578 = "0.7"
+//! izihawa-hyper-multipart = "1.0"
 //! ```
 //!
 //! Import the crate:

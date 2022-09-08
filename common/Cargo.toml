@@ -2,7 +2,7 @@
 name                      = "izihawa-common-multipart"
 description               = "An implementation of multipart/form-data"
 authors                   = ["Ferris Tseng <ferristseng@fastmail.fm>", "Pasha Podolsky <ppodolsky@me.com>"]
-documentation             = "https://docs.rs/izihawa-multipart"
+documentation             = "https://docs.rs/izihawa-common-multipart"
 repository                = "https://github.com/izihawa/rs-multipart"
 keywords                  = ["multipart", "form", "http"]
 categories                = ["asynchronous", "web-programming"]

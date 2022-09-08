@@ -22,7 +22,7 @@ your Cargo.toml file:
 
 ```toml
 [dependencies]
-hyper-multipart-rfc7578 = "0.8"
+izihawa-hyper-multipart = "1.0"
 ```
 
 and import:
@@ -58,11 +58,11 @@ at your option.
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
 
-[common docs badge]: https://docs.rs/izihawa-common-multipart/badge.svg "common-multipart-rfc7578 documentation"
+[common docs badge]: https://docs.rs/izihawa-common-multipart/badge.svg "izihawa-common-multipart documentation"
 [common docs link]: https://docs.rs/izihawa-common-multipart
-[common crate badge]: https://img.shields.io/crates/v/common-multipart-rfc7578.svg "common-multipart-rfc7578 crates.io"
-[common crate link]: https://crates.io/crates/common-multipart-rfc7578
-[hyper docs badge]: https://docs.rs/hyper-multipart-rfc7578/badge.svg "hyper-multipart-rfc7578 documentation"
-[hyper docs link]: https://docs.rs/hyper-multipart-rfc7578
-[hyper crate badge]: https://img.shields.io/crates/v/hyper-multipart-rfc7578.svg "hyper-multipart-rfc7578 crates.io"
-[hyper crate link]: https://crates.io/crates/hyper-multipart-rfc7578
+[common crate badge]: https://img.shields.io/crates/v/izihawa-common-multipart.svg "izihawa-common-multipart crates.io"
+[common crate link]: https://crates.io/crates/izihawa-common-multipart
+[hyper docs badge]: https://docs.rs/izihawa-hyper-multipart/badge.svg "izihawa-hyper-multipart documentation"
+[hyper docs link]: https://docs.rs/izihawa-hyper-multipart
+[hyper crate badge]: https://img.shields.io/crates/v/izihawa-hyper-multipart.svg "izihawa-hyper-multipart crates.io"
+[hyper crate link]: https://crates.io/crates/izihawa-hyper-multipart
