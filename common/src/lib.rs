@@ -41,7 +41,7 @@ pub mod client {
     pub mod multipart {
         pub use crate::{
             boundary::BoundaryGenerator,
-            client_::{Body, Form},
+            client_::{Body, Form, CONTENT_TYPE_APPLICATION_X_DIRECTORY, CONTENT_TYPE_MULTIPART_FORM_DATA},
         };
     }
 }

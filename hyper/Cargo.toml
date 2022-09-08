@@ -6,7 +6,7 @@ documentation             = "https://docs.rs/izihawa-hyper-multipart"
 repository                = "https://github.com/izihawa/rs-multipart"
 keywords                  = ["hyper", "multipart", "form", "http"]
 categories                = ["asynchronous", "web-programming"]
-version                   = "1.0.1"
+version                   = "1.0.2"
 readme                    = "../README.md"
 license                   = "MIT OR Apache-2.0"
 edition                   = "2021"
@@ -17,7 +17,7 @@ maintenance               = { status = "passively-maintained" }
 
 [dependencies]
 bytes                     = "1.1"
-izihawa-common-multipart  = { path = "../common", version = "1.0.1" }
+izihawa-common-multipart  = { path = "../common", version = "1.0.2" }
 futures-core              = "0.3"
 http                      = "0.2"
 hyper                     = { version = "0.14", features = ["stream"] }

@@ -28,6 +28,8 @@ use std::{
 
 static CONTENT_DISPOSITION: HeaderName = header::CONTENT_DISPOSITION;
 static CONTENT_TYPE: HeaderName = header::CONTENT_TYPE;
+pub static CONTENT_TYPE_APPLICATION_X_DIRECTORY: &str = "application/x-directory";
+pub static CONTENT_TYPE_MULTIPART_FORM_DATA: &str = "multipart/form-data";
 
 /// Async streamable Multipart body.
 ///
@@ -186,6 +188,7 @@ pub struct Form<'a> {
     /// [See](https://tools.ietf.org/html/rfc7578#section-4.1).
     ///
     boundary: String,
+    content_type: &'a str,
 }
 
 impl<'a> Default for Form<'a> {
@@ -227,6 +230,19 @@ impl<'a> Form<'a> {
         Form {
             parts: vec![],
             boundary: G::generate_boundary(),
+            content_type: CONTENT_TYPE_MULTIPART_FORM_DATA,
+        }
+    }
+
+    #[inline]
+    pub fn with_content_type<G>(content_type: &'a str) -> Form<'a>
+    where
+        G: BoundaryGenerator,
+    {
+        Form {
+            parts: vec![],
+            boundary: G::generate_boundary(),
+            content_type,
         }
     }
 
@@ -581,7 +597,7 @@ impl<'a> Form<'a> {
     }
 
     pub fn content_type(&self) -> String {
-        format!("multipart/form-data; boundary={}", &self.boundary)
+        format!("{}; boundary={}", &self.content_type, &self.boundary)
     }
 }
 
