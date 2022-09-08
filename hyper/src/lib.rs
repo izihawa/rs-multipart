@@ -22,7 +22,7 @@
 //! Import the crate:
 //!
 //! ```rust
-//! extern crate hyper_multipart_rfc7578 as multipart;
+//! extern crate izihawa_hyper_multipart as multipart;
 //! ```
 //!
 //! ## Example:
@@ -30,7 +30,7 @@
 //! With a custom client:
 //!
 //! ```rust
-//! extern crate hyper_multipart_rfc7578 as hyper_multipart;
+//! extern crate izihawa_hyper_multipart as hyper_multipart;
 //!
 //! use hyper::{Client, Request};
 //! use hyper_multipart::client::{self, multipart};
@@ -56,7 +56,7 @@
 //! With a default client:
 //!
 //! ```rust
-//! extern crate hyper_multipart_rfc7578 as hyper_multipart;
+//! extern crate izihawa_hyper_multipart as hyper_multipart;
 //!
 //! use hyper::{
 //!     Client, Request,
@@ -85,7 +85,7 @@
 
 #![allow(clippy::needless_doctest_main)]
 
-extern crate common_multipart_rfc7578 as common_multipart;
+extern crate izihawa_common_multipart as common_multipart;
 
 mod body;
 

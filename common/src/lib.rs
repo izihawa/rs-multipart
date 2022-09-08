@@ -14,30 +14,17 @@
 //! Add either the Hyper implementation or the Actix implementation to
 //! your Cargo.toml file:
 //!
-//! ### Actix:
-//!
-//! ```toml
-//! [dependencies]
-//! actix-multipart-rfc7578 = "0.10"
-//! ```
-//!
-//! and import:
-//!
-//! ```rust
-//! extern crate actix_multipart_rfc7578 as multipart;
-//! ```
-//!
 //! ### Hyper:
 //!
 //! ```toml
 //! [dependencies]
-//! hyper-multipart-rfc7578 = "0.8"
+//! izihawa-hyper-multipart = "1.0"
 //! ```
 //!
 //! and import:
 //!
 //! ```rust
-//! extern crate hyper_multipart_rfc7578 as multipart;
+//! extern crate izihawa_hyper_multipart as multipart;
 //! ```
 //!
 

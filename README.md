@@ -8,7 +8,6 @@
 | Name   | Documentation                                  | Crate                                             |
 | ------ | -----------------------------------------------| ------------------------------------------------- |
 | common | [![Docs][common docs badge]][common docs link] | [![Crate][common crate badge]][common crate link] |
-| actix  | [![Docs][actix docs badge]][actix docs link]   | [![Crate][actix crate badge]][actix crate link]   |
 | hyper  | [![Docs][hyper docs badge]][hyper docs link]   | [![Crate][hyper crate badge]][hyper crate link]   |
 
 This crate contains an implementation of the multipart/form-data media
@@ -18,19 +17,6 @@ type described in [RFC 7578](https://tools.ietf.org/html/rfc7578).
 
 Add either the Hyper implementation or the Actix implementation to
 your Cargo.toml file:
-
-#### Actix:
-
-```toml
-[dependencies]
-actix-multipart-rfc7578 = "0.10"
-```
-
-and import:
-
-```rust
-extern crate actix_multipart_rfc7578 as multipart;
-```
 
 #### Hyper:
 
@@ -42,7 +28,7 @@ hyper-multipart-rfc7578 = "0.8"
 and import:
 
 ```rust
-extern crate hyper_multipart_rfc7578 as multipart;
+extern crate izihawa_hyper_multipart as multipart;
 ```
 
 
@@ -72,14 +58,10 @@ at your option.
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
 
-[common docs badge]: https://docs.rs/common-multipart-rfc7578/badge.svg "common-multipart-rfc7578 documentation"
-[common docs link]: https://docs.rs/common-multipart-rfc7578
+[common docs badge]: https://docs.rs/izihawa-common-multipart/badge.svg "common-multipart-rfc7578 documentation"
+[common docs link]: https://docs.rs/izihawa-common-multipart
 [common crate badge]: https://img.shields.io/crates/v/common-multipart-rfc7578.svg "common-multipart-rfc7578 crates.io"
 [common crate link]: https://crates.io/crates/common-multipart-rfc7578
-[actix docs badge]: https://docs.rs/actix-multipart-rfc7578/badge.svg "actix-multipart-rfc7578 documentation"
-[actix docs link]: https://docs.rs/actix-multipart-rfc7578
-[actix crate badge]: https://img.shields.io/crates/v/actix-multipart-rfc7578.svg "actix-multipart-rfc7578 crates.io"
-[actix crate link]: https://crates.io/crates/actix-multipart-rfc7578
 [hyper docs badge]: https://docs.rs/hyper-multipart-rfc7578/badge.svg "hyper-multipart-rfc7578 documentation"
 [hyper docs link]: https://docs.rs/hyper-multipart-rfc7578
 [hyper crate badge]: https://img.shields.io/crates/v/hyper-multipart-rfc7578.svg "hyper-multipart-rfc7578 crates.io"

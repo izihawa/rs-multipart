@@ -29,6 +29,7 @@ use std::{
     task::{Context, Poll},
     vec::IntoIter,
 };
+use std::collections::HashMap;
 
 static CONTENT_DISPOSITION: HeaderName = header::CONTENT_DISPOSITION;
 static CONTENT_TYPE: HeaderName = header::CONTENT_TYPE;
@@ -90,6 +91,14 @@ impl<'a> Body<'a> {
         self.buf.put_slice(CONTENT_DISPOSITION.as_ref());
         self.buf.put_slice(b": ");
         self.buf.put_slice(part.content_disposition.as_bytes());
+        if let Some(headers) = &part.headers {
+            for (header_name, header_value) in headers {
+                self.buf.put_slice(header_name.as_bytes());
+                self.buf.put_slice(b": ");
+                self.buf.put_slice(header_value.as_bytes());
+                self.write_crlf();
+            }
+        }
         self.write_crlf();
         self.write_crlf();
     }
@@ -199,7 +208,7 @@ impl<'a> Form<'a> {
     /// # Examples
     ///
     /// ```
-    /// # use common_multipart_rfc7578::client::multipart::{
+    /// # use izihawa_common_multipart::client::multipart::{
     /// #     self,
     /// #     BoundaryGenerator
     /// # };
@@ -231,7 +240,7 @@ impl<'a> Form<'a> {
     /// # Examples
     ///
     /// ```
-    /// use common_multipart_rfc7578::client::multipart;
+    /// use izihawa_common_multipart::client::multipart;
     ///
     /// let mut form = multipart::Form::default();
     ///
@@ -249,6 +258,7 @@ impl<'a> Form<'a> {
             name,
             None,
             None,
+            None,
         ))
     }
 
@@ -257,7 +267,7 @@ impl<'a> Form<'a> {
     /// # Examples
     ///
     /// ```
-    /// use common_multipart_rfc7578::client::multipart;
+    /// use izihawa_common_multipart::client::multipart;
     /// use std::io::Cursor;
     ///
     /// let bytes = Cursor::new("Hello World!");
@@ -278,6 +288,7 @@ impl<'a> Form<'a> {
             name,
             None,
             None,
+            None,
         ));
     }
 
@@ -286,7 +297,7 @@ impl<'a> Form<'a> {
     /// # Examples
     ///
     /// ```
-    /// use common_multipart_rfc7578::client::multipart;
+    /// use izihawa_common_multipart::client::multipart;
     /// use futures_util::io::Cursor;
     ///
     /// let bytes = Cursor::new("Hello World!");
@@ -307,6 +318,7 @@ impl<'a> Form<'a> {
             name,
             None,
             None,
+            None
         ));
     }
 
@@ -315,7 +327,7 @@ impl<'a> Form<'a> {
     /// # Examples
     ///
     /// ```
-    /// use common_multipart_rfc7578::client::multipart;
+    /// use izihawa_common_multipart::client::multipart;
     ///
     /// let mut form = multipart::Form::default();
     ///
@@ -337,7 +349,7 @@ impl<'a> Form<'a> {
     /// # Examples
     ///
     /// ```
-    /// use common_multipart_rfc7578::client::multipart;
+    /// use izihawa_common_multipart::client::multipart;
     ///
     /// let mut form = multipart::Form::default();
     ///
@@ -389,6 +401,7 @@ impl<'a> Form<'a> {
             name,
             mime,
             Some(path.as_ref().as_os_str().to_string_lossy()),
+            None,
         ));
 
         Ok(())
@@ -399,7 +412,7 @@ impl<'a> Form<'a> {
     /// # Examples
     ///
     /// ```
-    /// use common_multipart_rfc7578::client::multipart;
+    /// use izihawa_common_multipart::client::multipart;
     /// use std::io::Cursor;
     ///
     /// let bytes = Cursor::new("Hello World!");
@@ -421,6 +434,7 @@ impl<'a> Form<'a> {
             name,
             None,
             Some(filename.into()),
+            None,
         ));
     }
 
@@ -429,16 +443,16 @@ impl<'a> Form<'a> {
     /// # Examples
     ///
     /// ```
-    /// use common_multipart_rfc7578::client::multipart;
+    /// use izihawa_common_multipart::client::multipart;
     /// use futures_util::io::Cursor;
     ///
     /// let bytes = Cursor::new("Hello World!");
     /// let mut form = multipart::Form::default();
     ///
-    /// form.add_async_reader_file("input", bytes, "filename.txt");
+    /// form.add_async_reader_file("input", bytes, "filename.txt", None);
     /// ```
     ///
-    pub fn add_async_reader_file<F, G, R>(&mut self, name: F, read: R, filename: G)
+    pub fn add_async_reader_file<F, G, R>(&mut self, name: F, read: R, filename: G, headers: Option<HashMap<String, String>>)
     where
         F: Display,
         G: Into<String>,
@@ -451,6 +465,7 @@ impl<'a> Form<'a> {
             name,
             None,
             Some(filename.into()),
+            headers,
         ));
     }
 
@@ -459,7 +474,7 @@ impl<'a> Form<'a> {
     /// # Examples
     ///
     /// ```
-    /// use common_multipart_rfc7578::client::multipart;
+    /// use izihawa_common_multipart::client::multipart;
     /// use std::io::Cursor;
     ///
     /// let bytes = Cursor::new("Hello World!");
@@ -481,6 +496,7 @@ impl<'a> Form<'a> {
             name,
             Some(mime),
             Some(filename.into()),
+            None,
         ));
     }
 
@@ -489,7 +505,7 @@ impl<'a> Form<'a> {
     /// # Examples
     ///
     /// ```
-    /// use common_multipart_rfc7578::client::multipart;
+    /// use izihawa_common_multipart::client::multipart;
     /// use futures_util::io::Cursor;
     ///
     /// let bytes = Cursor::new("Hello World!");
@@ -516,6 +532,7 @@ impl<'a> Form<'a> {
             name,
             Some(mime),
             Some(filename.into()),
+            None,
         ));
     }
 
@@ -526,7 +543,7 @@ impl<'a> Form<'a> {
     ///
     /// ```
     /// use hyper::{Method, Request};
-    /// use hyper_multipart_rfc7578::client::multipart;
+    /// use izihawa_hyper_multipart::client::multipart;
     ///
     /// let mut req_builder = Request::post("http://localhost:80/upload");
     /// let mut form = multipart::Form::default();
@@ -551,7 +568,7 @@ impl<'a> Form<'a> {
     ///
     /// ```
     /// use hyper::{Body, Method, Request};
-    /// use hyper_multipart_rfc7578::client::multipart;
+    /// use izihawa_hyper_multipart::client::multipart;
     ///
     /// let mut req_builder = Request::post("http://localhost:80/upload");
     /// let mut form = multipart::Form::default();
@@ -606,6 +623,8 @@ pub struct Part<'a> {
     /// [See](https://tools.ietf.org/html/rfc7578#section-4.2).
     ///
     content_disposition: String,
+    /// Non-RFC extension
+    headers: Option<HashMap<String, String>>
 }
 
 impl<'a> Part<'a> {
@@ -617,7 +636,7 @@ impl<'a> Part<'a> {
     /// files need to be specified for one form field, they can all be specified
     /// with the same name parameter.
     ///
-    fn new<N, F>(inner: Inner<'a>, name: N, mime: Option<Mime>, filename: Option<F>) -> Part<'a>
+    fn new<N, F>(inner: Inner<'a>, name: N, mime: Option<Mime>, filename: Option<F>, headers: Option<HashMap<String, String>>) -> Part<'a>
     where
         N: Display,
         F: Display,
@@ -643,6 +662,7 @@ impl<'a> Part<'a> {
             inner,
             content_type,
             content_disposition: format!("form-data; {}", disposition_params.join("; ")),
+            headers,
         }
     }
 }

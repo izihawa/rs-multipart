@@ -19,7 +19,7 @@ use std::iter::FromIterator;
 /// # Examples
 ///
 /// ```
-/// use common_multipart_rfc7578::client::multipart::BoundaryGenerator;
+/// use izihawa_common_multipart::client::multipart::BoundaryGenerator;
 ///
 /// struct TestGenerator;
 ///

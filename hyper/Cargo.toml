@@ -1,23 +1,23 @@
 [package]
-name                      = "hyper-multipart-rfc7578"
-description               = "An implementation of multipart/form-data (RFC7578) for Hyper"
-authors                   = ["Ferris Tseng <ferristseng@fastmail.fm>"]
-documentation             = "https://docs.rs/hyper-multipart-rfc7578"
-repository                = "https://github.com/ferristseng/rust-multipart-rfc7578"
+name                      = "izihawa-hyper-multipart"
+description               = "An implementation of multipart/form-data for Hyper"
+authors                   = ["Ferris Tseng <ferristseng@fastmail.fm>", "Pasha Podolsky <ppodolsky@me.com>"]
+documentation             = "https://docs.rs/izihawa-hyper-multipart"
+repository                = "https://github.com/izihawa/rs-multipart"
 keywords                  = ["hyper", "multipart", "form", "http"]
 categories                = ["asynchronous", "web-programming"]
-version                   = "0.8.0"
+version                   = "1.0.0"
 readme                    = "../README.md"
 license                   = "MIT OR Apache-2.0"
 edition                   = "2021"
 
 [badges]
-github                    = { repository = "ferristseng/rust-multipart-rfc7578", workflow = "Rust" }
+github                    = { repository = "izihawa/rs-multipart", workflow = "Rust" }
 maintenance               = { status = "passively-maintained" }
 
 [dependencies]
 bytes                     = "1.1"
-common-multipart-rfc7578  = { path = "../common", version = "0.6" }
+izihawa-common-multipart  = { path = "../common", version = "1.0" }
 futures-core              = "0.3"
 http                      = "0.2"
 hyper                     = { version = "0.14", features = ["stream"] }

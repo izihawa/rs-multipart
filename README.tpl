@@ -42,10 +42,6 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [common docs link]: https://docs.rs/common-multipart-rfc7578
 [common crate badge]: https://img.shields.io/crates/v/common-multipart-rfc7578.svg "common-multipart-rfc7578 crates.io"
 [common crate link]: https://crates.io/crates/common-multipart-rfc7578
-[actix docs badge]: https://docs.rs/actix-multipart-rfc7578/badge.svg "actix-multipart-rfc7578 documentation"
-[actix docs link]: https://docs.rs/actix-multipart-rfc7578
-[actix crate badge]: https://img.shields.io/crates/v/actix-multipart-rfc7578.svg "actix-multipart-rfc7578 crates.io"
-[actix crate link]: https://crates.io/crates/actix-multipart-rfc7578
 [hyper docs badge]: https://docs.rs/hyper-multipart-rfc7578/badge.svg "hyper-multipart-rfc7578 documentation"
 [hyper docs link]: https://docs.rs/hyper-multipart-rfc7578
 [hyper crate badge]: https://img.shields.io/crates/v/hyper-multipart-rfc7578.svg "hyper-multipart-rfc7578 crates.io"

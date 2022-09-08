@@ -6,7 +6,7 @@
 // copied, modified, or distributed except according to those terms.
 //
 
-extern crate hyper_multipart_rfc7578 as hyper_multipart;
+extern crate izihawa_hyper_multipart as hyper_multipart;
 
 use hyper::{Client, Request};
 use hyper_multipart::client::multipart;
