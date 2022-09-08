@@ -13,7 +13,12 @@ use crate::{
 use bytes::{BufMut, BytesMut};
 use futures_core::Stream;
 use futures_util::io::{AllowStdIo, AsyncRead, Cursor};
-use http::{self, header::{self, HeaderName}, HeaderMap, request::{Builder, Request}};
+use http::{
+    self,
+    header::{self, HeaderName},
+    request::{Builder, Request},
+    HeaderMap,
+};
 use mime::{self, Mime};
 use std::{
     fmt::Display,
@@ -189,6 +194,7 @@ pub struct Form<'a> {
     ///
     boundary: String,
     content_type: &'a str,
+    content_disposition: Option<&'a str>,
 }
 
 impl<'a> Default for Form<'a> {
@@ -231,18 +237,23 @@ impl<'a> Form<'a> {
             parts: vec![],
             boundary: G::generate_boundary(),
             content_type: CONTENT_TYPE_MULTIPART_FORM_DATA,
+            content_disposition: None,
         }
     }
 
     #[inline]
-    pub fn with_content_type<G>(content_type: &'a str) -> Form<'a>
+    pub fn with_headers<G>(
+        content_type: Option<&'a str>,
+        content_disposition: Option<&'a str>,
+    ) -> Form<'a>
     where
         G: BoundaryGenerator,
     {
         Form {
             parts: vec![],
             boundary: G::generate_boundary(),
-            content_type,
+            content_type: content_type.unwrap_or(CONTENT_TYPE_MULTIPART_FORM_DATA),
+            content_disposition,
         }
     }
 
@@ -329,7 +340,7 @@ impl<'a> Form<'a> {
             name,
             None,
             None,
-            None
+            None,
         ));
     }
 
@@ -463,8 +474,13 @@ impl<'a> Form<'a> {
     /// form.add_async_reader_file("input", bytes, "filename.txt", None);
     /// ```
     ///
-    pub fn add_async_reader_file<F, G, R>(&mut self, name: F, read: R, filename: G, headers: Option<HeaderMap>)
-    where
+    pub fn add_async_reader_file<F, G, R>(
+        &mut self,
+        name: F,
+        read: R,
+        filename: G,
+        headers: Option<HeaderMap>,
+    ) where
         F: Display,
         G: Into<String>,
         R: 'a + AsyncRead + Send + Sync + Unpin,
@@ -592,8 +608,11 @@ impl<'a> Form<'a> {
     where
         I: From<Body<'a>> + Into<B>,
     {
-        req.header(&CONTENT_TYPE, self.content_type().as_str())
-            .body(I::from(Body::from(self)).into())
+        let mut req = req.header(&CONTENT_TYPE, self.content_type().as_str());
+        if let Some(content_disposition) = self.content_disposition {
+            req = req.header(&CONTENT_DISPOSITION, content_disposition);
+        }
+        req.body(I::from(Body::from(self)).into())
     }
 
     pub fn content_type(&self) -> String {
@@ -635,7 +654,19 @@ pub struct Part<'a> {
     ///
     content_disposition: String,
     /// Non-RFC extension
-    headers: Option<HeaderMap>
+    headers: Option<HeaderMap>,
+}
+
+pub fn content_disposition<N, F>(name: N, filename: Option<F>) -> String
+where
+    N: Display,
+    F: Display,
+{
+    let mut disposition_params = vec![format!("name=\"{}\"", name)];
+    if let Some(filename) = filename {
+        disposition_params.push(format!("filename=\"{}\"", filename));
+    }
+    format!("form-data; {}", disposition_params.join("; "))
 }
 
 impl<'a> Part<'a> {
@@ -647,32 +678,23 @@ impl<'a> Part<'a> {
     /// files need to be specified for one form field, they can all be specified
     /// with the same name parameter.
     ///
-    fn new<N, F>(inner: Inner<'a>, name: N, mime: Option<Mime>, filename: Option<F>, headers: Option<HeaderMap>) -> Part<'a>
+    fn new<N, F>(
+        inner: Inner<'a>,
+        name: N,
+        mime: Option<Mime>,
+        filename: Option<F>,
+        headers: Option<HeaderMap>,
+    ) -> Part<'a>
     where
         N: Display,
         F: Display,
     {
-        // `name` disposition parameter is required. It should correspond to the
-        // name of a form field.
-        //
-        // [See 4.2](https://tools.ietf.org/html/rfc7578#section-4.2)
-        //
-        let mut disposition_params = vec![format!("name=\"{}\"", name)];
-
-        // `filename` can be supplied for files, but is totally optional.
-        //
-        // [See 4.2](https://tools.ietf.org/html/rfc7578#section-4.2)
-        //
-        if let Some(filename) = filename {
-            disposition_params.push(format!("filename=\"{}\"", filename));
-        }
-
         let content_type = format!("{}", mime.unwrap_or_else(|| inner.default_content_type()));
 
         Part {
             inner,
             content_type,
-            content_disposition: format!("form-data; {}", disposition_params.join("; ")),
+            content_disposition: content_disposition(name, filename),
             headers,
         }
     }
