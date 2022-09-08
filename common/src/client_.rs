@@ -193,8 +193,8 @@ pub struct Form<'a> {
     /// [See](https://tools.ietf.org/html/rfc7578#section-4.1).
     ///
     boundary: String,
-    content_type: &'a str,
-    content_disposition: Option<&'a str>,
+    content_type: String,
+    content_disposition: Option<String>,
 }
 
 impl<'a> Default for Form<'a> {
@@ -236,15 +236,15 @@ impl<'a> Form<'a> {
         Form {
             parts: vec![],
             boundary: G::generate_boundary(),
-            content_type: CONTENT_TYPE_MULTIPART_FORM_DATA,
+            content_type: CONTENT_TYPE_MULTIPART_FORM_DATA.to_string(),
             content_disposition: None,
         }
     }
 
     #[inline]
     pub fn with_headers<G>(
-        content_type: Option<&'a str>,
-        content_disposition: Option<&'a str>,
+        content_type: Option<String>,
+        content_disposition: Option<String>,
     ) -> Form<'a>
     where
         G: BoundaryGenerator,
@@ -252,7 +252,7 @@ impl<'a> Form<'a> {
         Form {
             parts: vec![],
             boundary: G::generate_boundary(),
-            content_type: content_type.unwrap_or(CONTENT_TYPE_MULTIPART_FORM_DATA),
+            content_type: content_type.unwrap_or_else(|| CONTENT_TYPE_MULTIPART_FORM_DATA.to_string()),
             content_disposition,
         }
     }
@@ -609,7 +609,7 @@ impl<'a> Form<'a> {
         I: From<Body<'a>> + Into<B>,
     {
         let mut req = req.header(&CONTENT_TYPE, self.content_type().as_str());
-        if let Some(content_disposition) = self.content_disposition {
+        if let Some(content_disposition) = &self.content_disposition {
             req = req.header(&CONTENT_DISPOSITION, content_disposition);
         }
         req.body(I::from(Body::from(self)).into())
