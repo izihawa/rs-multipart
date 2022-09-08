@@ -35,7 +35,7 @@ pub trait BoundaryGenerator {
     fn generate_boundary() -> String;
 }
 
-pub(crate) struct RandomAsciiGenerator;
+pub struct RandomAsciiGenerator;
 
 impl BoundaryGenerator for RandomAsciiGenerator {
     /// Creates a boundary of 6 ascii characters.
