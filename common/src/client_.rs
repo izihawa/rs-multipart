@@ -13,11 +13,7 @@ use crate::{
 use bytes::{BufMut, BytesMut};
 use futures_core::Stream;
 use futures_util::io::{AllowStdIo, AsyncRead, Cursor};
-use http::{
-    self,
-    header::{self, HeaderName},
-    request::{Builder, Request},
-};
+use http::{self, header::{self, HeaderName}, HeaderMap, request::{Builder, Request}};
 use mime::{self, Mime};
 use std::{
     fmt::Display,
@@ -29,7 +25,6 @@ use std::{
     task::{Context, Poll},
     vec::IntoIter,
 };
-use std::collections::HashMap;
 
 static CONTENT_DISPOSITION: HeaderName = header::CONTENT_DISPOSITION;
 static CONTENT_TYPE: HeaderName = header::CONTENT_TYPE;
@@ -93,7 +88,7 @@ impl<'a> Body<'a> {
         self.buf.put_slice(part.content_disposition.as_bytes());
         if let Some(headers) = &part.headers {
             for (header_name, header_value) in headers {
-                self.buf.put_slice(header_name.as_bytes());
+                self.buf.put_slice(header_name.as_ref());
                 self.buf.put_slice(b": ");
                 self.buf.put_slice(header_value.as_bytes());
                 self.write_crlf();
@@ -452,7 +447,7 @@ impl<'a> Form<'a> {
     /// form.add_async_reader_file("input", bytes, "filename.txt", None);
     /// ```
     ///
-    pub fn add_async_reader_file<F, G, R>(&mut self, name: F, read: R, filename: G, headers: Option<HashMap<String, String>>)
+    pub fn add_async_reader_file<F, G, R>(&mut self, name: F, read: R, filename: G, headers: Option<HeaderMap>)
     where
         F: Display,
         G: Into<String>,
@@ -624,7 +619,7 @@ pub struct Part<'a> {
     ///
     content_disposition: String,
     /// Non-RFC extension
-    headers: Option<HashMap<String, String>>
+    headers: Option<HeaderMap>
 }
 
 impl<'a> Part<'a> {
@@ -636,7 +631,7 @@ impl<'a> Part<'a> {
     /// files need to be specified for one form field, they can all be specified
     /// with the same name parameter.
     ///
-    fn new<N, F>(inner: Inner<'a>, name: N, mime: Option<Mime>, filename: Option<F>, headers: Option<HashMap<String, String>>) -> Part<'a>
+    fn new<N, F>(inner: Inner<'a>, name: N, mime: Option<Mime>, filename: Option<F>, headers: Option<HeaderMap>) -> Part<'a>
     where
         N: Display,
         F: Display,
