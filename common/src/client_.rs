@@ -19,7 +19,6 @@ use http::{
     request::{Builder, Request},
     HeaderMap,
 };
-use mime::{self, Mime};
 use std::{
     fmt::Display,
     fs::File,
@@ -95,10 +94,10 @@ impl<'a> Body<'a> {
         self.buf.put_slice(part.content_disposition.as_bytes());
         if let Some(headers) = &part.headers {
             for (header_name, header_value) in headers {
+                self.write_crlf();
                 self.buf.put_slice(header_name.as_ref());
                 self.buf.put_slice(b": ");
                 self.buf.put_slice(header_value.as_bytes());
-                self.write_crlf();
             }
         }
         self.write_crlf();
@@ -241,22 +240,6 @@ impl<'a> Form<'a> {
         }
     }
 
-    #[inline]
-    pub fn with_headers<G>(
-        content_type: Option<String>,
-        content_disposition: Option<String>,
-    ) -> Form<'a>
-    where
-        G: BoundaryGenerator,
-    {
-        Form {
-            parts: vec![],
-            boundary: G::generate_boundary(),
-            content_type: content_type.unwrap_or_else(|| CONTENT_TYPE_MULTIPART_FORM_DATA.to_string()),
-            content_disposition,
-        }
-    }
-
     /// Adds a text part to the Form.
     ///
     /// # Examples
@@ -278,8 +261,18 @@ impl<'a> Form<'a> {
         self.parts.push(Part::new::<_, String>(
             Inner::Text(text.into()),
             name,
+            Some("text/plain".to_string()),
             None,
             None,
+        ))
+    }
+
+    pub fn add_directory(&mut self, name: &str, dirname: &str) {
+        self.parts.push(Part::new::<_, String>(
+            Inner::Text("".into()),
+            name,
+            Some(CONTENT_TYPE_APPLICATION_X_DIRECTORY.to_string()),
+            Some(dirname.to_string()),
             None,
         ))
     }
@@ -353,48 +346,30 @@ impl<'a> Form<'a> {
     ///
     /// let mut form = multipart::Form::default();
     ///
-    /// form.add_file("file", file!()).expect("file to exist");
+    /// form.add_file("file", file!(), None).expect("file to exist");
     /// ```
     ///
-    pub fn add_file<P, F>(&mut self, name: F, path: P) -> io::Result<()>
+    pub fn add_file<P, F>(
+        &mut self,
+        name: F,
+        path: P,
+        content_type: Option<String>,
+    ) -> io::Result<()>
     where
         P: AsRef<Path>,
         F: Display,
     {
-        self._add_file(name, path, None)
-    }
-
-    /// Adds a file with the specified mime type to the form.
-    /// If the mime type isn't specified, a mime type will try to
-    /// be derived.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use izihawa_common_multipart::client::multipart;
-    ///
-    /// let mut form = multipart::Form::default();
-    ///
-    /// form.add_file_with_mime("data", "test.csv", mime::TEXT_CSV);
-    /// ```
-    ///
-    pub fn add_file_with_mime<P, F>(&mut self, name: F, path: P, mime: Mime) -> io::Result<()>
-    where
-        P: AsRef<Path>,
-        F: Display,
-    {
-        self._add_file(name, path, Some(mime))
+        self._add_file(name, path, content_type)
     }
 
     /// Internal method for adding a file part to the form.
     ///
-    fn _add_file<P, F>(&mut self, name: F, path: P, mime: Option<Mime>) -> io::Result<()>
+    fn _add_file<P, F>(&mut self, name: F, path: P, content_type: Option<String>) -> io::Result<()>
     where
         P: AsRef<Path>,
         F: Display,
     {
         let f = File::open(&path)?;
-        let mime = mime.or_else(|| mime_guess::from_path(&path).first());
 
         let len = match f.metadata() {
             // If the path is not a file, it can't be uploaded because there
@@ -421,7 +396,7 @@ impl<'a> Form<'a> {
         self.parts.push(Part::new(
             Inner::Read(read, len),
             name,
-            mime,
+            content_type,
             Some(path.as_ref().as_os_str().to_string_lossy()),
             None,
         ));
@@ -493,73 +468,6 @@ impl<'a> Form<'a> {
             None,
             Some(filename.into()),
             headers,
-        ));
-    }
-
-    /// Adds a readable part to the Form as a file with a specified mime.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use izihawa_common_multipart::client::multipart;
-    /// use std::io::Cursor;
-    ///
-    /// let bytes = Cursor::new("Hello World!");
-    /// let mut form = multipart::Form::default();
-    ///
-    /// form.add_reader_file_with_mime("input", bytes, "filename.txt", mime::TEXT_PLAIN);
-    /// ```
-    ///
-    pub fn add_reader_file_with_mime<F, G, R>(&mut self, name: F, read: R, filename: G, mime: Mime)
-    where
-        F: Display,
-        G: Into<String>,
-        R: 'a + Read + Send + Sync + Unpin,
-    {
-        let read = Box::new(read);
-
-        self.parts.push(Part::new::<_, String>(
-            Inner::Read(read, None),
-            name,
-            Some(mime),
-            Some(filename.into()),
-            None,
-        ));
-    }
-
-    /// Adds a readable part to the Form as a file with a specified mime.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use izihawa_common_multipart::client::multipart;
-    /// use futures_util::io::Cursor;
-    ///
-    /// let bytes = Cursor::new("Hello World!");
-    /// let mut form = multipart::Form::default();
-    ///
-    /// form.add_async_reader_file_with_mime("input", bytes, "filename.txt", mime::TEXT_PLAIN);
-    /// ```
-    ///
-    pub fn add_async_reader_file_with_mime<F, G, R>(
-        &mut self,
-        name: F,
-        read: R,
-        filename: G,
-        mime: Mime,
-    ) where
-        F: Display,
-        G: Into<String>,
-        R: 'a + AsyncRead + Send + Sync + Unpin,
-    {
-        let read = Box::new(read);
-
-        self.parts.push(Part::new::<_, String>(
-            Inner::AsyncRead(read),
-            name,
-            Some(mime),
-            Some(filename.into()),
-            None,
         ));
     }
 
@@ -681,7 +589,7 @@ impl<'a> Part<'a> {
     fn new<N, F>(
         inner: Inner<'a>,
         name: N,
-        mime: Option<Mime>,
+        content_type: Option<String>,
         filename: Option<F>,
         headers: Option<HeaderMap>,
     ) -> Part<'a>
@@ -689,7 +597,10 @@ impl<'a> Part<'a> {
         N: Display,
         F: Display,
     {
-        let content_type = format!("{}", mime.unwrap_or_else(|| inner.default_content_type()));
+        let content_type = format!(
+            "{}",
+            content_type.unwrap_or_else(|| "application/octet-stream".to_string())
+        );
 
         Part {
             inner,
@@ -719,19 +630,6 @@ enum Inner<'a> {
     /// The `String` variant handles "text/plain" form data payloads.
     ///
     Text(String),
-}
-
-impl<'a> Inner<'a> {
-    /// Returns the default Content-Type header value as described in section 4.4.
-    ///
-    /// [See](https://tools.ietf.org/html/rfc7578#section-4.4)
-    ///
-    fn default_content_type(&self) -> Mime {
-        match *self {
-            Inner::Read(_, _) | Inner::AsyncRead(_) => mime::APPLICATION_OCTET_STREAM,
-            Inner::Text(_) => mime::TEXT_PLAIN,
-        }
-    }
 }
 
 #[cfg(test)]
@@ -791,26 +689,18 @@ mod tests {
     async fn add_file_returns_expected_result() {
         let mut form = Form::default();
 
-        assert!(form.add_file("test_file.txt", test_file_path()).is_ok());
-
-        let data = form_output(form).await;
-
-        assert!(data.contains("This is a test file!"));
-        assert!(data.contains("text/plain"));
-    }
-
-    #[tokio::test]
-    async fn add_file_with_mime_returns_expected_result() {
-        let mut form = Form::default();
-
         assert!(form
-            .add_file_with_mime("test_file.txt", test_file_path(), mime::TEXT_CSV)
+            .add_file(
+                "test_file.txt",
+                test_file_path(),
+                Some("text/plain".to_string())
+            )
             .is_ok());
 
         let data = form_output(form).await;
 
         assert!(data.contains("This is a test file!"));
-        assert!(data.contains("text/csv"));
+        assert!(data.contains("text/plain"));
     }
 
     struct FixedBoundary;
